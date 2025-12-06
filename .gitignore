@@ -41,3 +41,9 @@ prisma/dev.db-journal
 # ide
 .vscode
 .idea
+
+# serena mcp
+.serena
+
+# claude code
+.claude
