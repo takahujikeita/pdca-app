@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { DashboardHeader } from '@/components/features/dashboard/dashboard-header';
+import { QueryProvider } from '@/lib/providers/query-provider';
 
 /**
  * ダッシュボードレイアウト
@@ -19,9 +20,11 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <DashboardHeader user={session.user} />
-      <main className="container mx-auto px-4 py-8">{children}</main>
-    </div>
+    <QueryProvider>
+      <div className="min-h-screen bg-gray-50">
+        <DashboardHeader user={session.user} />
+        <main className="container mx-auto px-4 py-8">{children}</main>
+      </div>
+    </QueryProvider>
   );
 }

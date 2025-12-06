@@ -1,16 +1,12 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ProjectList } from '@/components/features/projects/project-list';
 
 /**
  * Projects List Page
  * Display and manage team development projects
  */
-export default async function ProjectsPage() {
-  // TODO: Fetch projects from API
-  // Currently showing mock data for empty state
-  const projects: unknown[] = [];
-
+export default function ProjectsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -23,23 +19,7 @@ export default async function ProjectsPage() {
         </Link>
       </div>
 
-      {projects.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>プロジェクトがまだありません</CardTitle>
-            <CardDescription>新しいプロジェクトを作成して、PDCAサイクルを始めましょう</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/projects/new">
-              <Button>最初のプロジェクトを作成</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Project cards will be displayed here */}
-        </div>
-      )}
+      <ProjectList />
     </div>
   );
 }
