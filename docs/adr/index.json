@@ -1,0 +1,120 @@
+{
+  "version": "1.0.0",
+  "created_at": "2025-12-06T08:16:00Z",
+  "updated_at": "2025-12-06T08:16:00Z",
+  "total_adrs": 4,
+  "adrs": [
+    {
+      "id": "ADR-0001",
+      "title": "Project Structure and Naming Conventions",
+      "status": "accepted",
+      "timestamp": "2025-12-06T08:16:00Z",
+      "file": "decisions/0001-project-structure.json",
+      "tags": [
+        "project-structure",
+        "naming-conventions",
+        "directory-organization",
+        "nextjs-app-router",
+        "typescript"
+      ],
+      "summary": "Next.js App Routerを活用したfeature-basedディレクトリ構造、ケバブケースファイル名、@/aliasによる個別インポートを採用"
+    },
+    {
+      "id": "ADR-0002",
+      "title": "Technology Stack and Dependencies",
+      "status": "accepted",
+      "timestamp": "2025-12-06T08:16:00Z",
+      "file": "decisions/0002-technology-stack.json",
+      "tags": [
+        "technology-stack",
+        "nextjs",
+        "typescript",
+        "tailwindcss",
+        "prisma",
+        "nextauth",
+        "tanstack-query",
+        "zod",
+        "dependencies"
+      ],
+      "summary": "Next.js 16 (App Router) + TypeScript + TailwindCSS + Prisma + SQLite + NextAuth.js + TanStack Query + Zodのスタックを採用"
+    },
+    {
+      "id": "ADR-0003",
+      "title": "Architecture Patterns and Code Organization",
+      "status": "accepted",
+      "timestamp": "2025-12-06T08:16:00Z",
+      "file": "decisions/0003-architecture-patterns.json",
+      "tags": [
+        "architecture",
+        "patterns",
+        "server-components",
+        "client-components",
+        "state-management",
+        "data-fetching",
+        "custom-hooks",
+        "tanstack-query",
+        "single-responsibility"
+      ],
+      "summary": "Server Components優先、単一責任原則、カスタムフック活用、Props-based制御、URL State優先の状態管理階層を採用"
+    },
+    {
+      "id": "ADR-0004",
+      "title": "Domain Knowledge and Business Logic",
+      "status": "accepted",
+      "timestamp": "2025-12-06T08:16:00Z",
+      "file": "decisions/0004-domain-knowledge.json",
+      "tags": [
+        "domain",
+        "business-logic",
+        "entities",
+        "business-rules",
+        "user-flow",
+        "pdca-cycle",
+        "evaluation",
+        "action",
+        "project",
+        "task"
+      ],
+      "summary": "User、Project、Task、Evaluation、Actionを主要エンティティとし、3つのPDCA粒度（プロジェクトレベル、タスクレベル、日常レベル）をサポートする"
+    }
+  ],
+  "tags_index": {
+    "project-structure": ["ADR-0001"],
+    "naming-conventions": ["ADR-0001"],
+    "directory-organization": ["ADR-0001"],
+    "nextjs-app-router": ["ADR-0001"],
+    "typescript": ["ADR-0001", "ADR-0002"],
+    "technology-stack": ["ADR-0002"],
+    "nextjs": ["ADR-0002"],
+    "tailwindcss": ["ADR-0002"],
+    "prisma": ["ADR-0002"],
+    "nextauth": ["ADR-0002"],
+    "tanstack-query": ["ADR-0002", "ADR-0003"],
+    "zod": ["ADR-0002"],
+    "dependencies": ["ADR-0002"],
+    "architecture": ["ADR-0003"],
+    "patterns": ["ADR-0003"],
+    "server-components": ["ADR-0003"],
+    "client-components": ["ADR-0003"],
+    "state-management": ["ADR-0003"],
+    "data-fetching": ["ADR-0003"],
+    "custom-hooks": ["ADR-0003"],
+    "single-responsibility": ["ADR-0003"],
+    "domain": ["ADR-0004"],
+    "business-logic": ["ADR-0004"],
+    "entities": ["ADR-0004"],
+    "business-rules": ["ADR-0004"],
+    "user-flow": ["ADR-0004"],
+    "pdca-cycle": ["ADR-0004"],
+    "evaluation": ["ADR-0004"],
+    "action": ["ADR-0004"],
+    "project": ["ADR-0004"],
+    "task": ["ADR-0004"]
+  },
+  "status_index": {
+    "accepted": ["ADR-0001", "ADR-0002", "ADR-0003", "ADR-0004"],
+    "proposed": [],
+    "deprecated": [],
+    "superseded": []
+  }
+}

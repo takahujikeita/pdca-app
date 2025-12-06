@@ -1,0 +1,131 @@
+{
+  "id": "ADR-0003",
+  "timestamp": "2025-12-06T08:16:00Z",
+  "title": "Architecture Patterns and Code Organization",
+  "status": "accepted",
+  "context": {
+    "problem": "10時間ハッカソンでスケーラブルで保守性の高いPDCA Appを構築するために、一貫したアーキテクチャパターンとコード組織化の方針を確立する必要がある",
+    "constraints": [
+      "Next.js App Router必須",
+      "Server Components優先",
+      "TypeScript strict mode",
+      "10時間という開発時間制約",
+      "1-3名の開発者"
+    ],
+    "requirements": [
+      "コンポーネントの責任分離",
+      "再利用性の高い設計",
+      "パフォーマンス最適化",
+      "保守性の向上",
+      "チーム開発での理解しやすさ"
+    ]
+  },
+  "decision": {
+    "summary": "Server Components優先、単一責任原則、カスタムフック活用、Props-based制御、URL State優先の状態管理階層を採用",
+    "details": "**1. Server Components vs Client Components戦略:**\n\n**Server Components（デフォルト）:**\n- データフェッチが必要なページ・コンポーネント\n- 静的コンテンツ、レイアウト\n- メリット: バンドルサイズ削減、初期ロード高速化、SEO最適化\n- 例: ページコンポーネント、リストコンポーネント、詳細表示コンポーネント\n\n**Client Components（\"use client\"指定）:**\n- インタラクティブな要素（フォーム、ボタン、状態管理）\n- ブラウザAPI使用（useState、useEffect、onClick等）\n- 例: フォーム、モーダル、インタラクティブUI\n\n**原則:**\n- デフォルトはServer Components\n- Client Componentsは必要な部分のみに制限\n- Server ComponentsからClient Componentsへpropsでデータを渡す\n- Client ComponentsはServer Componentsをchildrenとして受け取れる\n\n**2. コンポーネント設計原則:**\n\n**単一責任原則（SRP）:**\n- 各コンポーネントは1つの責任のみを持つ\n- 大きなコンポーネントは小さく分割\n- 表示ロジックとビジネスロジックを分離\n\n**コンポーネント階層:**\n```\nPage Component (Server)\n  └─ Layout Component (Server)\n       └─ List Component (Server)\n            └─ Card Component (Server/Client)\n                 └─ Button Component (Client)\n```\n\n**Props Interface定義:**\n- すべてのコンポーネントで明示的なPropsインターフェース\n- デフォルト値の明示\n- オプショナルプロパティの適切な使用\n\n**3. 状態管理階層（優先順位）:**\n\n**1. URL State（最優先）:**\n- 検索パラメータ、フィルタ、ページネーション、ソート\n- useSearchParams、useRouterを使用\n- ブラウザバック/フォワード対応\n- ブックマーク可能\n\n**2. Server State（サーバーデータ）:**\n- TanStack Query (React Query)でキャッシュ管理\n- データフェッチ、再取得、楽観的更新\n- queryKey, mutationFnパターン\n\n**3. Local State（ローカル状態）:**\n- フォーム入力、UI状態（モーダル開閉、タブ選択等）\n- React useState、useReducer\n- コンポーネント内で完結する状態\n\n**4. Global State（グローバル状態）:**\n- 認証ユーザー情報、テーマ設定\n- React Context（軽量）またはZustand（複雑）\n- アプリ全体で共有する状態\n\n**4. データフェッチング戦略:**\n\n**Server Componentsでのフェッチ:**\n- async/awaitで直接fetch\n- ISR: next.revalidateオプション\n- エラーハンドリング: try/catch\n- notFound()でNotFoundページ表示\n\n**Client Componentsでのフェッチ:**\n- TanStack Query (useQuery, useMutation)\n- 自動リトライ、キャッシング\n- ローディング状態、エラー状態の管理\n\n**5. カスタムフック活用:**\n- ロジックを分離して再利用性向上\n- データ取得、状態管理、副作用を抽象化\n- 命名: use-*.ts（use-projects.ts、use-auth.ts）\n\n**6. エラーハンドリングパターン:**\n\n**API Routes:**\n- Zodでバリデーション\n- try/catchで例外処理\n- 適切なHTTPステータスコード返却\n\n**Client Components:**\n- TanStack QueryのonError\n- Toast通知でユーザーフィードバック\n- フォールバックUI表示\n\n**7. パフォーマンス最適化:**\n- Next.js Imageコンポーネント使用\n- 動的インポート（dynamic import）\n- Suspense境界設定\n- Code splitting\n- Memo化（必要な場合のみ）",
+    "rationale": "Server Components優先により初期ロードが高速化し、バンドルサイズが削減される。単一責任原則により各コンポーネントの役割が明確化され、テストと保守が容易になる。カスタムフックによりロジックの再利用性が向上。URL State優先により、ユーザー体験（ブックマーク、共有）が向上し、状態管理の複雑性が軽減される。TanStack Queryによりサーバーデータの管理が自動化され、開発効率が向上",
+    "alternatives": [
+      {
+        "option": "すべてClient Components",
+        "rejected": true,
+        "reason": "バンドルサイズが大きくなり、初期ロードが遅くなる。SEOにも不利"
+      },
+      {
+        "option": "Redux Toolkitでグローバルステート管理",
+        "rejected": true,
+        "reason": "10時間という短期間ではオーバーエンジニアリング。TanStack QueryとContextで十分"
+      },
+      {
+        "option": "SWR instead of TanStack Query",
+        "rejected": true,
+        "reason": "TanStack Queryの方が機能が豊富（mutationサポート、DevTools）で、TypeScript統合が強力"
+      },
+      {
+        "option": "getServerSideProps/getStaticProps (Pages Router)",
+        "rejected": true,
+        "reason": "App Routerの方がServer Componentsを活用でき、より柔軟なデータフェッチが可能"
+      }
+    ],
+    "consequences": [
+      "開発者はServer ComponentsとClient Componentsの境界を理解する必要がある",
+      "\"use client\"ディレクティブを適切に配置する必要がある",
+      "URL Stateを優先するため、検索パラメータの管理が増える",
+      "TanStack Queryの学習コストはあるが、サーバーデータ管理が大幅に簡素化される",
+      "カスタムフックの作成により、初期の実装時間は増えるが、再利用性と保守性が向上"
+    ]
+  },
+  "implementation": {
+    "affected_files": [
+      "app/**/*.tsx",
+      "components/**/*.tsx",
+      "lib/hooks/**/*.ts",
+      "lib/api/**/*.ts",
+      "lib/contexts/**/*.tsx"
+    ],
+    "affected_components": [
+      "All page components",
+      "All feature components",
+      "Custom hooks",
+      "Context providers"
+    ],
+    "code_patterns": [
+      "Server Components with async/await",
+      "Client Components with \"use client\"",
+      "Custom hooks for logic reuse",
+      "TanStack Query for server state",
+      "Props-based component control",
+      "Single Responsibility Principle"
+    ],
+    "examples": [
+      {
+        "file": "app/(dashboard)/projects/page.tsx",
+        "description": "Server Component with async data fetching",
+        "code": "import { getProjects } from '@/lib/api/projects';\nimport { ProjectList } from '@/components/features/projects/project-list';\n\nexport default async function ProjectsPage() {\n  const projects = await getProjects();\n  return <ProjectList projects={projects} />;\n}"
+      },
+      {
+        "file": "components/features/projects/project-form.tsx",
+        "description": "Client Component with form state",
+        "code": "'use client';\n\nimport { useState } from 'react';\nimport { useRouter } from 'next/navigation';\nimport { useCreateProject } from '@/lib/hooks/use-projects';\n\nexport function ProjectForm() {\n  const [name, setName] = useState('');\n  const router = useRouter();\n  const { mutate: createProject, isPending } = useCreateProject();\n\n  const handleSubmit = (e: React.FormEvent) => {\n    e.preventDefault();\n    createProject({ name }, {\n      onSuccess: () => router.push('/projects')\n    });\n  };\n\n  return <form onSubmit={handleSubmit}>...</form>;\n}"
+      },
+      {
+        "file": "lib/hooks/use-projects.ts",
+        "description": "Custom hook with TanStack Query",
+        "code": "import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';\n\nexport function useProjects() {\n  return useQuery({\n    queryKey: ['projects'],\n    queryFn: () => fetch('/api/projects').then(r => r.json()),\n  });\n}\n\nexport function useCreateProject() {\n  const queryClient = useQueryClient();\n  return useMutation({\n    mutationFn: (data: ProjectInput) =>\n      fetch('/api/projects', { method: 'POST', body: JSON.stringify(data) }),\n    onSuccess: () => {\n      queryClient.invalidateQueries({ queryKey: ['projects'] });\n    },\n  });\n}"
+      },
+      {
+        "file": "app/api/projects/route.ts",
+        "description": "API Route with Zod validation",
+        "code": "import { NextResponse } from 'next/server';\nimport { z } from 'zod';\nimport { prisma } from '@/lib/db/client';\n\nconst projectSchema = z.object({\n  name: z.string().min(1).max(100),\n  description: z.string().optional(),\n});\n\nexport async function POST(request: Request) {\n  try {\n    const body = await request.json();\n    const validatedData = projectSchema.parse(body);\n    const project = await prisma.project.create({ data: validatedData });\n    return NextResponse.json(project, { status: 201 });\n  } catch (error) {\n    if (error instanceof z.ZodError) {\n      return NextResponse.json({ error: 'Validation failed' }, { status: 400 });\n    }\n    return NextResponse.json({ error: 'Internal error' }, { status: 500 });\n  }\n}"
+      }
+    ]
+  },
+  "metadata": {
+    "tags": [
+      "architecture",
+      "patterns",
+      "server-components",
+      "client-components",
+      "state-management",
+      "data-fetching",
+      "custom-hooks",
+      "tanstack-query",
+      "single-responsibility"
+    ],
+    "related_adrs": [
+      "ADR-0001",
+      "ADR-0002"
+    ],
+    "search_keywords": [
+      "architecture",
+      "patterns",
+      "server components",
+      "client components",
+      "state management",
+      "data fetching",
+      "custom hooks",
+      "tanstack query",
+      "react query",
+      "single responsibility"
+    ]
+  }
+}

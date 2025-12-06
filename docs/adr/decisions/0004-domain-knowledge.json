@@ -1,0 +1,136 @@
+{
+  "id": "ADR-0004",
+  "timestamp": "2025-12-06T08:16:00Z",
+  "title": "Domain Knowledge and Business Logic",
+  "status": "accepted",
+  "context": {
+    "problem": "PDCA App for POSSEのドメイン知識、ビジネスエンティティ、ビジネスルール、ユーザーフローを明確に定義し、開発チーム全体で共有する必要がある",
+    "constraints": [
+      "POSSEコミュニティの大学生開発者向け",
+      "最大50名の同時利用者",
+      "3つのPDCA粒度（プロジェクト、タスク、日常）",
+      "10時間ハッカソンでの実装"
+    ],
+    "requirements": [
+      "PDCAサイクルの完全な実装",
+      "学習と成長の可視化",
+      "チーム開発の効率化",
+      "継続的改善の文化醸成"
+    ]
+  },
+  "decision": {
+    "summary": "User、Project、Task、Evaluation、Actionを主要エンティティとし、3つのPDCA粒度（プロジェクトレベル、タスクレベル、日常レベル）をサポートする",
+    "details": "**1. ドメインエンティティ:**\n\n**User（ユーザー）:**\n- id: string - ユーザー識別子\n- name: string - 氏名\n- email: string - メールアドレス\n- avatar?: string - アバター画像URL\n- role: 'admin' | 'member' | 'guest' - ロール\n- skills: string[] - 保有スキル\n- joinDate: Date - 参加日\n- isActive: boolean - アクティブフラグ\n\n**ビジネスルール:**\n- メールアドレスは一意である必要がある\n- adminロールは少なくとも1名必要\n- ゲストユーザーは読み取り専用\n\n**Project（プロジェクト）:**\n- id: string - プロジェクト識別子\n- name: string - プロジェクト名\n- description: string - 説明\n- startDate: Date - 開始日\n- endDate: Date - 終了日\n- status: 'planning' | 'active' | 'completed' | 'suspended' - ステータス\n- goals: string[] - 目標リスト\n- kpis: KPI[] - 成功指標\n- teamMembers: ProjectMember[] - チームメンバー\n- createdBy: string - 作成者ID\n- createdAt: Date - 作成日時\n\n**ビジネスルール:**\n- プロジェクト名は必須（1-100文字）\n- 開始日は終了日より前である必要がある\n- activeステータスのプロジェクトには少なくとも1名のメンバーが必要\n- プロジェクトには少なくとも1つの目標が必要\n\n**Task（タスク）:**\n- id: string - タスク識別子\n- projectId: string - 所属プロジェクトID\n- title: string - タスク名\n- description: string - 説明\n- assignee: string - 担当者ID\n- priority: 'high' | 'medium' | 'low' - 優先度\n- status: 'todo' | 'in_progress' | 'review' | 'done' - ステータス\n- estimatedHours: number - 見積もり時間\n- actualHours?: number - 実績時間\n- dueDate: Date - 期限\n- dependencies: string[] - 依存タスクID\n- tags: string[] - タグ\n- createdAt: Date - 作成日時\n- completedAt?: Date - 完了日時\n\n**ビジネスルール:**\n- タスクは必ずプロジェクトに紐づく\n- 担当者はプロジェクトメンバーである必要がある\n- doneステータスに変更時はcompletedAtが必須\n- 依存タスクがすべて完了するまでin_progressに変更不可\n\n**Evaluation（評価）:**\n- id: string - 評価識別子\n- userId: string - 評価者ID\n- targetType: 'task' | 'project' | 'daily' - 評価対象タイプ\n- targetId: string - 評価対象ID\n- selfScore: number - 自己採点（1-5）\n- peerScores: PeerScore[] - 相互評価\n- autoScore?: number - 自動評価\n- comments: string - コメント\n- improvements: string[] - 改善点\n- learnings: string[] - 学んだこと\n- evaluatedAt: Date - 評価日時\n\n**ビジネスルール:**\n- 自己評価は必須、相互評価は任意\n- selfScoreは1-5の範囲\n- タスク完了後に評価が必要\n- 評価は編集可能だが、履歴を保持\n\n**Action（改善アクション）:**\n- id: string - アクション識別子\n- title: string - アクション名\n- description: string - 説明\n- assignee: string - 担当者ID\n- dueDate: Date - 期限\n- status: 'planned' | 'in_progress' | 'completed' - ステータス\n- priority: 'high' | 'medium' | 'low' - 優先度\n- relatedEvaluation: string - 関連評価ID\n- impact: 'high' | 'medium' | 'low' - 影響度\n- effort: 'high' | 'medium' | 'low' - 工数\n- createdAt: Date - 作成日時\n- completedAt?: Date - 完了日時\n\n**ビジネスルール:**\n- アクションは評価から生成される\n- 影響度（高）×工数（低）を優先的に実行\n- 完了後、効果測定を実施\n\n**2. PDCAサイクルの3つの粒度:**\n\n**プロジェクトレベル:**\n- Plan: プロジェクト計画、目標設定、マイルストーン、KPI設定\n- Do: 進捗記録、チーム活動、成果物作成\n- Check: プロジェクト評価、KPI達成度測定、チームレビュー\n- Action: プロジェクト改善アクション、次回プロジェクトへの反映\n\n**タスクレベル:**\n- Plan: タスク計画、見積もり、優先度設定\n- Do: タスク実行、作業時間記録、進捗更新\n- Check: タスク完了評価、技術習得度自己採点、課題記録\n- Action: 個人改善アクション、次タスクへの反映\n\n**日常レベル:**\n- Plan: 日次学習目標、週次目標\n- Do: 学習活動記録、日報作成\n- Check: 学習効率評価、成長度確認\n- Action: 学習方法改善、継続性向上\n\n**3. ユーザーフロー:**\n\n**新規プロジェクト作成フロー:**\n1. ユーザーがプロジェクト作成画面にアクセス\n2. プロジェクト基本情報を入力（名前、説明、期間、目標）\n3. チームメンバーを追加、役割を設定\n4. マイルストーンとKPIを設定\n5. プロジェクトを作成、activeステータスに設定\n\n**タスク実行～評価フロー:**\n1. ユーザーが担当タスクを確認\n2. タスクをin_progressに変更\n3. 作業開始、進捗を記録\n4. タスク完了、doneステータスに変更\n5. 自己評価を実施（技術習得度、課題、学び）\n6. 改善アクションを生成\n7. 次のタスクに改善アクションを反映\n\n**評価～改善フロー:**\n1. ユーザーがタスク/プロジェクト完了後に評価画面にアクセス\n2. 自己評価を入力（1-5段階、コメント、改善点、学び）\n3. チームメンバーからのフィードバック（任意）\n4. 自動評価（計画vs実績比較）\n5. システムが改善アクション候補を提案\n6. ユーザーが改善アクションを選択・作成\n7. アクションをアクションリストに追加\n8. 定期的にアクション実行状況を確認\n\n**4. ビジネスロジック:**\n\n**進捗率計算:**\n- プロジェクト進捗率 = 完了タスク数 / 全タスク数\n- タスク進捗率 = 実績時間 / 見積もり時間（上限100%）\n\n**評価指標計算:**\n- 技術成長度 = 習得技術数 × 平均評価スコア\n- 実行力 = 計画達成率 × 納期遵守率\n- 学習効率 = 習得度 / 学習時間\n- 貢献度 = チームへの貢献回数 + ヘルプ提供回数\n\n**優先度自動設定:**\n- 期限が近い（3日以内）→ 高\n- 依存タスクがブロック中 → 高\n- 影響度が高い → 中以上\n\n**5. 用語集:**\n\n- **PDCA**: Plan（計画）、Do（実行）、Check（評価）、Action（改善）の継続的改善サイクル\n- **KPI**: Key Performance Indicator（重要業績評価指標）\n- **マイルストーン**: プロジェクトの中間目標地点\n- **バーンダウンチャート**: 残タスク数の推移を示すグラフ\n- **レーダーチャート**: スキル成長度を多角的に表示するグラフ\n- **自己評価**: 自分自身の成果を評価\n- **相互評価**: チームメンバー間での評価\n- **自動評価**: システムが計画vs実績を比較して算出",
+    "rationale": "3つのPDCA粒度により、プロジェクト全体から日常の学習まで幅広くカバー。Evaluation→Action→Taskのフローにより継続的改善を実現。評価指標の定量化により成長を可視化。ユーザーフローを明確化することで一貫したUXを提供",
+    "alternatives": [
+      {
+        "option": "単一のPDCA粒度のみ（プロジェクトレベルのみ）",
+        "rejected": true,
+        "reason": "個人の日常的な学習や小さなタスクの改善がカバーできない"
+      },
+      {
+        "option": "評価を任意にする",
+        "rejected": true,
+        "reason": "PDCAサイクルのCheckが疎かになり、改善が進まない"
+      },
+      {
+        "option": "相互評価を必須にする",
+        "rejected": true,
+        "reason": "10時間という短期間では実装が難しく、ユーザーの負担が大きい"
+      }
+    ],
+    "consequences": [
+      "開発者は3つのPDCA粒度を理解し、それぞれに対応した機能を実装する必要がある",
+      "評価機能が複雑になるため、UI/UXの設計が重要",
+      "改善アクションの自動提案機能は将来的にAIによる強化が可能",
+      "ユーザーは評価を習慣化する必要があるため、リマインダー機能が重要"
+    ]
+  },
+  "implementation": {
+    "affected_files": [
+      "src/types/models.ts",
+      "prisma/schema.prisma",
+      "src/lib/utils/evaluation.ts",
+      "src/lib/utils/calculation.ts",
+      "src/app/(dashboard)/projects/**/*",
+      "src/app/(dashboard)/tasks/**/*",
+      "src/app/(dashboard)/evaluations/**/*",
+      "src/components/features/projects/**/*",
+      "src/components/features/tasks/**/*",
+      "src/components/features/evaluations/**/*"
+    ],
+    "affected_components": [
+      "ProjectList",
+      "ProjectCard",
+      "ProjectForm",
+      "TaskList",
+      "TaskCard",
+      "TaskForm",
+      "TaskKanban",
+      "EvaluationForm",
+      "EvaluationChart",
+      "ActionList",
+      "ActionForm",
+      "Dashboard",
+      "StatsCard",
+      "ProgressBar",
+      "RadarChart"
+    ],
+    "code_patterns": [
+      "TypeScript型定義でドメインモデルを表現",
+      "Prismaスキーマでデータベースモデルを定義",
+      "ビジネスロジックはlib/utils/に配置",
+      "評価指標計算はユーティリティ関数化",
+      "ドメインルールはバリデーション層で強制"
+    ],
+    "examples": [
+      {
+        "file": "src/types/models.ts",
+        "description": "ドメインモデル型定義",
+        "code": "export interface User {\n  id: string;\n  name: string;\n  email: string;\n  avatar?: string;\n  role: 'admin' | 'member' | 'guest';\n  skills: string[];\n  joinDate: Date;\n  isActive: boolean;\n}\n\nexport interface Project {\n  id: string;\n  name: string;\n  description: string;\n  startDate: Date;\n  endDate: Date;\n  status: 'planning' | 'active' | 'completed' | 'suspended';\n  goals: string[];\n  kpis: KPI[];\n  teamMembers: ProjectMember[];\n  createdBy: string;\n  createdAt: Date;\n}\n\nexport interface Task {\n  id: string;\n  projectId: string;\n  title: string;\n  description: string;\n  assignee: string;\n  priority: 'high' | 'medium' | 'low';\n  status: 'todo' | 'in_progress' | 'review' | 'done';\n  estimatedHours: number;\n  actualHours?: number;\n  dueDate: Date;\n  dependencies: string[];\n  tags: string[];\n  createdAt: Date;\n  completedAt?: Date;\n}\n\nexport interface Evaluation {\n  id: string;\n  userId: string;\n  targetType: 'task' | 'project' | 'daily';\n  targetId: string;\n  selfScore: number;\n  peerScores: PeerScore[];\n  autoScore?: number;\n  comments: string;\n  improvements: string[];\n  learnings: string[];\n  evaluatedAt: Date;\n}\n\nexport interface Action {\n  id: string;\n  title: string;\n  description: string;\n  assignee: string;\n  dueDate: Date;\n  status: 'planned' | 'in_progress' | 'completed';\n  priority: 'high' | 'medium' | 'low';\n  relatedEvaluation: string;\n  impact: 'high' | 'medium' | 'low';\n  effort: 'high' | 'medium' | 'low';\n  createdAt: Date;\n  completedAt?: Date;\n}"
+      },
+      {
+        "file": "src/lib/utils/calculation.ts",
+        "description": "ビジネスロジック - 評価指標計算",
+        "code": "/**\n * プロジェクト進捗率を計算\n * @param completedTasks - 完了タスク数\n * @param totalTasks - 全タスク数\n * @returns 進捗率（0-1）\n */\nexport function calculateProjectProgress(\n  completedTasks: number,\n  totalTasks: number\n): number {\n  if (totalTasks === 0) return 0;\n  return Math.min(completedTasks / totalTasks, 1);\n}\n\n/**\n * 技術成長度を計算\n * @param acquiredSkills - 習得技術数\n * @param averageScore - 平均評価スコア\n * @returns 技術成長度\n */\nexport function calculateTechnicalGrowth(\n  acquiredSkills: number,\n  averageScore: number\n): number {\n  return acquiredSkills * averageScore;\n}\n\n/**\n * 実行力を計算\n * @param completionRate - 計画達成率\n * @param onTimeRate - 納期遵守率\n * @returns 実行力（0-100）\n */\nexport function calculateExecutionPower(\n  completionRate: number,\n  onTimeRate: number\n): number {\n  return completionRate * onTimeRate * 100;\n}"
+      },
+      {
+        "file": "src/lib/utils/priority.ts",
+        "description": "ビジネスロジック - 優先度自動設定",
+        "code": "/**\n * タスクの優先度を自動判定\n * @param task - タスク情報\n * @returns 自動判定された優先度\n */\nexport function autoAssignPriority(task: Task): Priority {\n  const daysUntilDue = differenceInDays(task.dueDate, new Date());\n  \n  // 期限が3日以内 → 高\n  if (daysUntilDue <= 3) {\n    return 'high';\n  }\n  \n  // 依存タスクがブロック中 → 高\n  if (task.dependencies.some(isBlocking)) {\n    return 'high';\n  }\n  \n  // 影響度が高い → 中以上\n  if (task.impact === 'high') {\n    return daysUntilDue <= 7 ? 'high' : 'medium';\n  }\n  \n  return 'medium';\n}"
+      }
+    ]
+  },
+  "metadata": {
+    "tags": [
+      "domain",
+      "business-logic",
+      "entities",
+      "business-rules",
+      "user-flow",
+      "pdca-cycle",
+      "evaluation",
+      "action",
+      "project",
+      "task"
+    ],
+    "related_adrs": [
+      "ADR-0003"
+    ],
+    "search_keywords": [
+      "domain",
+      "business",
+      "entities",
+      "rules",
+      "logic",
+      "user flow",
+      "pdca",
+      "evaluation",
+      "action",
+      "project",
+      "task",
+      "calculation",
+      "priority"
+    ]
+  }
+}

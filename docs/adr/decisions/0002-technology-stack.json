@@ -1,0 +1,160 @@
+{
+  "id": "ADR-0002",
+  "timestamp": "2025-12-06T08:16:00Z",
+  "title": "Technology Stack and Dependencies",
+  "status": "accepted",
+  "context": {
+    "problem": "10時間ハッカソンでPDCA App for POSSEを開発するために最適な技術スタックを選定する必要がある。開発速度、型安全性、パフォーマンス、デプロイの容易さを考慮",
+    "constraints": [
+      "開発時間10時間",
+      "1-3名の開発者",
+      "無料または最小コストのサービス",
+      "Vercel無料プラン想定",
+      "TypeScript必須"
+    ],
+    "requirements": [
+      "高速な開発体験",
+      "型安全性",
+      "SSR/SSG対応",
+      "認証機能",
+      "データベース永続化",
+      "UI/UXの統一性"
+    ]
+  },
+  "decision": {
+    "summary": "Next.js 16 (App Router) + TypeScript + TailwindCSS + Prisma + SQLite + NextAuth.js + TanStack Query + Zodのスタックを採用",
+    "details": "**コアフレームワーク:**\n- Next.js 16 (App Router) - フルスタックReactフレームワーク、SSR/SSG/ISR対応\n- React 19 - UIライブラリ、Server Components対応\n- TypeScript (strict mode) - 型安全性の確保\n\n**スタイリング:**\n- TailwindCSS - ユーティリティファーストCSSフレームワーク、高速UI実装\n- または Chakra UI - コンポーネントベースUIライブラリ（選択肢）\n\n**データベース:**\n- Prisma - TypeScript-firstのORMツール\n- SQLite - 開発簡易性重視の軽量DB（本番環境ではPostgreSQLへ移行可能）\n\n**認証:**\n- NextAuth.js - Next.js統合認証ライブラリ\n- GitHub OAuth / Google OAuth - 外部認証プロバイダー\n\n**状態管理:**\n- TanStack Query (React Query) - サーバーステート管理、キャッシング\n- React Context - グローバルステート（認証、テーマ）\n- Zustand - 複雑なグローバルステート（必要に応じて）\n\n**バリデーション:**\n- Zod - スキーマバリデーション、型安全性\n\n**開発ツール:**\n- ESLint - 静的解析\n- Prettier - コードフォーマッター\n- Vitest - テストフレームワーク\n- React Testing Library - Reactコンポーネントテスト\n\n**デプロイ:**\n- Vercel - Next.js最適化されたホスティングプラットフォーム\n- Vercel Blob - ファイルストレージ（画像、ドキュメント）\n\n**パッケージマネージャー:**\n- npm / yarn / bun - プロジェクトにより選択",
+    "rationale": "Next.js App RouterはServer Componentsによりパフォーマンスが高く、10時間という短期間でフルスタックアプリを構築可能。Prisma + SQLiteは開発環境のセットアップが簡単で、型安全なDB操作が可能。TailwindCSSは高速なUI実装に最適。NextAuth.jsはOAuth認証を数行で実装可能。TanStack Queryはサーバーデータのキャッシング・再取得を自動化。Zodはバリデーションと型推論を統合。すべてTypeScriptエコシステムで統一され、型安全性が高い",
+    "alternatives": [
+      {
+        "option": "Remix",
+        "rejected": true,
+        "reason": "Next.jsに比べてエコシステムが小さく、認証やデプロイのベストプラクティスが確立されていない"
+      },
+      {
+        "option": "Create React App + Express",
+        "rejected": true,
+        "reason": "フロントエンド/バックエンドを別々に管理する必要があり、10時間という短期間での開発に不向き"
+      },
+      {
+        "option": "MongoDB",
+        "rejected": true,
+        "reason": "スキーマレスDBは型安全性の確保が難しく、PrismaとSQLiteの組み合わせの方がTypeScriptとの親和性が高い"
+      },
+      {
+        "option": "Firebase Authentication",
+        "rejected": true,
+        "reason": "NextAuth.jsの方がNext.jsとの統合が深く、カスタマイズ性が高い"
+      },
+      {
+        "option": "Redux Toolkit",
+        "rejected": true,
+        "reason": "サーバーステートはTanStack Queryで管理し、グローバルステートはContextで十分。Reduxはオーバーエンジニアリング"
+      }
+    ],
+    "consequences": [
+      "開発者はNext.js App Router、Server Components、React Queryのベストプラクティスを理解する必要がある",
+      "SQLiteは本番環境では性能制限があり、PostgreSQL等への移行が必要になる可能性",
+      "TailwindCSSはユーティリティクラスが多くなりHTMLが冗長になる可能性",
+      "NextAuth.jsのセッション管理はNext.js特有のパターンを理解する必要がある",
+      "型安全性が高いため、開発初期の学習コストはあるが、長期的な保守性は向上"
+    ]
+  },
+  "implementation": {
+    "affected_files": [
+      "package.json",
+      "tsconfig.json",
+      "next.config.js",
+      "tailwind.config.ts",
+      "prisma/schema.prisma",
+      ".eslintrc.json",
+      ".prettierrc"
+    ],
+    "package_dependencies": {
+      "core": [
+        "next@16",
+        "react@19",
+        "react-dom@19",
+        "typescript@5"
+      ],
+      "styling": [
+        "tailwindcss@3",
+        "postcss",
+        "autoprefixer"
+      ],
+      "database": [
+        "@prisma/client",
+        "prisma"
+      ],
+      "auth": [
+        "next-auth@5"
+      ],
+      "state_management": [
+        "@tanstack/react-query@5"
+      ],
+      "validation": [
+        "zod@3"
+      ],
+      "dev_tools": [
+        "eslint",
+        "prettier",
+        "vitest",
+        "@testing-library/react"
+      ]
+    },
+    "code_patterns": [
+      "TypeScript strict mode",
+      "Server Components優先",
+      "TanStack Query for server state",
+      "Zod for validation",
+      "Prisma for database operations"
+    ],
+    "examples": [
+      {
+        "file": "package.json",
+        "description": "依存関係の定義"
+      },
+      {
+        "file": "app/api/projects/route.ts",
+        "description": "Next.js API Route with Prisma and Zod"
+      },
+      {
+        "file": "app/api/auth/[...nextauth]/route.ts",
+        "description": "NextAuth.js setup"
+      },
+      {
+        "file": "lib/api/hooks.ts",
+        "description": "TanStack Query custom hooks"
+      }
+    ]
+  },
+  "metadata": {
+    "tags": [
+      "technology-stack",
+      "nextjs",
+      "typescript",
+      "tailwindcss",
+      "prisma",
+      "nextauth",
+      "tanstack-query",
+      "zod",
+      "dependencies"
+    ],
+    "related_adrs": [
+      "ADR-0001",
+      "ADR-0003"
+    ],
+    "search_keywords": [
+      "stack",
+      "framework",
+      "dependencies",
+      "nextjs",
+      "typescript",
+      "prisma",
+      "nextauth",
+      "tailwindcss",
+      "react query",
+      "zod"
+    ]
+  }
+}

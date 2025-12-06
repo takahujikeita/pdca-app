@@ -1,0 +1,111 @@
+{
+  "id": "ADR-0001",
+  "timestamp": "2025-12-06T08:16:00Z",
+  "title": "Project Structure and Naming Conventions",
+  "status": "accepted",
+  "context": {
+    "problem": "10時間ハッカソンでPDCA App for POSSEを開発するにあたり、効率的で保守性の高いプロジェクト構造と一貫した命名規則を確立する必要がある",
+    "constraints": [
+      "Next.js App Router必須",
+      "TypeScript strict mode必須",
+      "開発時間10時間という制約",
+      "1-3名の開発者での実装"
+    ],
+    "requirements": [
+      "明確なディレクトリ構造",
+      "一貫した命名規則",
+      "拡張性のある設計",
+      "チーム開発での理解しやすさ"
+    ]
+  },
+  "decision": {
+    "summary": "Next.js App Routerを活用したfeature-basedディレクトリ構造、ケバブケースファイル名、@/aliasによる個別インポートを採用",
+    "details": "プロジェクトは以下の構造を持つ:\n\n**ルートディレクトリ構造:**\n- src/app/ - Next.js App Router (ページ、レイアウト、API Routes)\n- src/components/ - Reactコンポーネント (ui, features, layouts)\n- src/lib/ - ユーティリティとビジネスロジック (db, api, auth, utils, constants)\n- src/types/ - TypeScript型定義\n- src/styles/ - グローバルスタイル\n- docs/ - ドキュメント (specs/, adr/)\n- prisma/ - Prismaスキーマとマイグレーション\n\n**App Router構造:**\n- app/layout.tsx - ルートレイアウト\n- app/page.tsx - ダッシュボード\n- app/(auth)/ - 認証グループ (login, register)\n- app/(dashboard)/ - ダッシュボードグループ (projects, tasks, evaluations, reports)\n- app/api/ - API Routes (auth, projects, tasks, evaluations)\n\n**命名規則:**\n- ファイル名: ケバブケース (project-card.tsx, use-projects.ts)\n- コンポーネント: PascalCase (ProjectCard, UserAvatar)\n- 関数/変数: camelCase (getProjects, isLoading)\n- 型定義: PascalCase (Project, User, Task)\n- 定数: UPPER_SNAKE_CASE (API_URL, MAX_PROJECTS)\n\n**ファイル種別接尾辞:**\n- コンポーネント: .tsx\n- フック: use-*.ts\n- 型定義: types.ts, models.ts\n- ユーティリティ: utils.ts, helpers.ts\n- 定数: constants.ts, config.ts\n- テスト: *.test.ts, *.spec.ts",
+    "rationale": "App Routerのroute groupsを活用することで認証/非認証の明確な分離が可能。feature-basedの構造により機能ごとの開発が並行しやすい。ケバブケースは小文字で統一されファイルシステムの互換性が高い。@/aliasとバレルインポート禁止によりtree-shakingを最適化",
+    "alternatives": [
+      {
+        "option": "src/を使わずapp/直下にすべて配置",
+        "rejected": true,
+        "reason": "ルートディレクトリが肥大化し、ビルド設定とソースコードの区別が曖昧になる"
+      },
+      {
+        "option": "PascalCaseファイル名 (Button.tsx)",
+        "rejected": true,
+        "reason": "ファイルシステムの大文字小文字の扱いが環境で異なり、互換性に問題が生じる可能性"
+      },
+      {
+        "option": "バレルインポート (index.ts経由)",
+        "rejected": true,
+        "reason": "ビルドサイズ肥大化、tree-shakingの妨げ、インポート元の不明瞭化"
+      }
+    ],
+    "consequences": [
+      "開発者は@/aliasで明確にインポート元を指定する必要がある",
+      "ファイル作成時にケバブケース命名を徹底する必要がある",
+      "feature-based構造により機能追加時の影響範囲が明確",
+      "route groupsにより認証ロジックの分離が容易"
+    ]
+  },
+  "implementation": {
+    "affected_files": [
+      "src/app/**/*",
+      "src/components/**/*",
+      "src/lib/**/*",
+      "src/types/**/*",
+      "tsconfig.json"
+    ],
+    "affected_components": [
+      "All components",
+      "All pages",
+      "All API routes"
+    ],
+    "code_patterns": [
+      "ケバブケースファイル名",
+      "@/alias個別インポート",
+      "feature-basedディレクトリ",
+      "route groups"
+    ],
+    "examples": [
+      {
+        "file": "src/app/(dashboard)/projects/page.tsx",
+        "description": "ダッシュボードグループ内のプロジェクト一覧ページ"
+      },
+      {
+        "file": "src/components/features/projects/project-card.tsx",
+        "description": "プロジェクトカードコンポーネント（ケバブケース）"
+      },
+      {
+        "file": "src/lib/hooks/use-projects.ts",
+        "description": "プロジェクト取得カスタムフック"
+      },
+      {
+        "file": "src/types/models.ts",
+        "description": "データモデル型定義"
+      }
+    ],
+    "tsconfig_paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "metadata": {
+    "tags": [
+      "project-structure",
+      "naming-conventions",
+      "directory-organization",
+      "nextjs-app-router",
+      "typescript"
+    ],
+    "related_adrs": [],
+    "search_keywords": [
+      "structure",
+      "naming",
+      "directory",
+      "organization",
+      "conventions",
+      "app router",
+      "kebab-case",
+      "alias",
+      "import"
+    ]
+  }
+}
